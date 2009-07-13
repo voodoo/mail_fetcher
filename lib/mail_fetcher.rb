@@ -27,7 +27,7 @@ class MailFetcher
     def fetch(options={})
       options = prepare_options(options)
       check_mailer!(options)
-      self.config ||= YAML.load_file("#{RAILS_ROOT}/config/mail_fetcher.yml")[Rails.evn].symbolize_keys
+      self.config ||= YAML.load_file("#{RAILS_ROOT}/config/mail_fetcher.yml")[Rails.env].symbolize_keys
       send :"fetch_#{access || "imap"}", options
     end
     
