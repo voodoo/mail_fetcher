@@ -27,7 +27,7 @@ class MailFetcher
     def fetch(options={})
       options = prepare_options(options)
       check_mailer!(options)
-      self.config ||= YAML.load_file("#{RAILS_ROOT}/config/mail_fetcher.yml")[options[:env] || ENV["RAILS_ENV"]]
+      self.config ||= YAML.load_file("#{RAILS_ROOT}/config/mail_fetcher.yml")[Rails.evn].symbolize_keys
       send :"fetch_#{access || "imap"}", options
     end
     
@@ -53,7 +53,8 @@ class MailFetcher
       else
         imap.examine('INBOX')
         imap.search(['ALL']).each do |message_id|
-          email = TMail::Mail.parse(imap.fetch(message_id,'RFC822')[0].attr['RFC822'])
+          #email = TMail::Mail.parse(imap.fetch(message_id,'RFC822')[0].attr['RFC822'])
+          email = imap.fetch(message_id,'RFC822')[0].attr['RFC822']          
           [options[:mailer_methods]].flatten.each {|method| mailer_class.send(method, email)}
           imap.store(message_id, "+FLAGS", [:Deleted]) if (options[:delete_if] && options[:delete_if].call(email))
           imap.store(message_id, "+FLAGS", [:Deleted]) unless options[:keep]
